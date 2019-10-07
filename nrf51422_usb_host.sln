@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.852
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrf51422_usb_host", "nrf51422_usb_host\nrf51422_usb_host.vcxproj", "{84D3A0D0-0C5B-4D6A-8B2B-FB06B4FB61DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|VisualGDB = Debug|VisualGDB
+		Release|VisualGDB = Release|VisualGDB
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{84D3A0D0-0C5B-4D6A-8B2B-FB06B4FB61DA}.Debug|VisualGDB.ActiveCfg = Debug|VisualGDB
+		{84D3A0D0-0C5B-4D6A-8B2B-FB06B4FB61DA}.Debug|VisualGDB.Build.0 = Debug|VisualGDB
+		{84D3A0D0-0C5B-4D6A-8B2B-FB06B4FB61DA}.Release|VisualGDB.ActiveCfg = Release|VisualGDB
+		{84D3A0D0-0C5B-4D6A-8B2B-FB06B4FB61DA}.Release|VisualGDB.Build.0 = Release|VisualGDB
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E6F7FA50-150A-4D3B-AC7F-9DC2605369EE}
+	EndGlobalSection
+EndGlobal
