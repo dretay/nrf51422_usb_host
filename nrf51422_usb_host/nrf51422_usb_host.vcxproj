@@ -68,9 +68,15 @@
     <ClCompile Include="..\..\include\usbhost\USBCore.c" />
     <ClCompile Include="..\..\include\usbhost\UsbDescriptorParser.c" />
     <ClCompile Include="application.c" />
+    <ClCompile Include="Button.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="uart_logger.c" />
-    <ClInclude Include="uart_logger.h" />
+    <ClCompile Include="SoftBlink.c" />
+    <ClCompile Include="UartLogger.c" />
+    <ClCompile Include="Usb.c" />
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="SoftBlink.h" />
+    <ClInclude Include="UartLogger.h" />
+    <ClInclude Include="Usb.h" />
     <None Include="nrf5x.props" />
     <ClCompile Include="$(BSP_ROOT)\nRF5x\components\toolchain\system_nrf51422.c" />
     <ClCompile Include="$(BSP_ROOT)\nRF5x\components\softdevice\common\softdevice_handler\softdevice_handler.c" />
@@ -338,5 +344,11 @@
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\uart\app_uart.h" />
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\uart\app_uart_dox_config.h" />
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\uart\retarget_dox_config.h" />
+    <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\led_softblink\led_softblink.c" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\led_softblink\led_softblink.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\led_softblink\led_softblink_dox_config.h" />
+    <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm.c" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm_dox_config.h" />
   </ItemGroup>
 </Project>

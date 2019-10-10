@@ -120,11 +120,11 @@
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.led_softblink</Key>
-        <Value />
+        <Value>yes</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.low_power_pwm</Key>
-        <Value />
+        <Value>yes</Value>
       </KeyValue>
       <KeyValue>
         <Key>com.sysprogs.bspoptions.nrf5x.libraries.mailbox</Key>

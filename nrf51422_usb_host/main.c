@@ -1362,7 +1362,7 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     timers_init();
-    buttons_leds_init(&erase_bonds);
+//    buttons_leds_init(&erase_bonds);
     ble_stack_init();
     scheduler_init();
     peer_manager_init(erase_bonds);

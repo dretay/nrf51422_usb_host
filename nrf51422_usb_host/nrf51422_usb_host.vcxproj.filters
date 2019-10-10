@@ -852,9 +852,6 @@
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\drivers_nrf\spi_master\nrf_drv_spi.h">
       <Filter>Header files\Device-specific files\Peripherals</Filter>
     </ClInclude>
-    <ClCompile Include="uart_logger.c">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="$(BSP_ROOT)\nRF5x\components\drivers_nrf\uart\nrf_drv_uart.c">
       <Filter>Source files\Device-specific files\Peripherals</Filter>
     </ClCompile>
@@ -876,6 +873,36 @@
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\uart\retarget_dox_config.h">
       <Filter>Header files\Device-specific files\Libraries</Filter>
     </ClInclude>
+    <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\led_softblink\led_softblink.c">
+      <Filter>Source files\Device-specific files\Libraries</Filter>
+    </ClCompile>
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\led_softblink\led_softblink.h">
+      <Filter>Header files\Device-specific files\Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\led_softblink\led_softblink_dox_config.h">
+      <Filter>Header files\Device-specific files\Libraries</Filter>
+    </ClInclude>
+    <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm.c">
+      <Filter>Source files\Device-specific files\Libraries</Filter>
+    </ClCompile>
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm.h">
+      <Filter>Header files\Device-specific files\Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm_dox_config.h">
+      <Filter>Header files\Device-specific files\Libraries</Filter>
+    </ClInclude>
+    <ClCompile Include="Button.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftBlink.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Usb.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UartLogger.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h">
@@ -911,7 +938,16 @@
     <ClInclude Include="..\..\include\usbhost\USBDevice.h">
       <Filter>Resource files\usbhost</Filter>
     </ClInclude>
-    <ClInclude Include="uart_logger.h">
+    <ClInclude Include="Button.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoftBlink.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="Usb.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="UartLogger.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
