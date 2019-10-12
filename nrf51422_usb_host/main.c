@@ -464,7 +464,7 @@ static void timers_init(void)
  * @details This function sets up all the necessary GAP (Generic Access Profile) parameters of the
  *          device including the device name, appearance, and the preferred connection parameters.
  */
-static void gap_params_init(void)
+static void gap_params_init(char* device_name)
 {
     uint32_t                err_code;
     ble_gap_conn_params_t   gap_conn_params;
@@ -473,8 +473,8 @@ static void gap_params_init(void)
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
     err_code = sd_ble_gap_device_name_set(&sec_mode,
-                                          (const uint8_t *)DEVICE_NAME,
-                                          strlen(DEVICE_NAME));
+		(const uint8_t *)device_name,
+		strlen(device_name));
     APP_ERROR_CHECK(err_code);
 
     err_code = sd_ble_gap_appearance_set(BLE_APPEARANCE_HID_MOUSE);
@@ -1356,6 +1356,7 @@ int main(void)
 {
     bool     erase_bonds;
     uint32_t err_code;
+	USBDevice* usb_device;
 
     // Initialize.
     err_code = NRF_LOG_INIT(NULL);
@@ -1370,18 +1371,22 @@ int main(void)
     {
         NRF_LOG_INFO("Bonds erased!\r\n");
     }
-//    gap_params_init();
-//    advertising_init();
-//    services_init();
-//    sensor_simulator_init();
-//    conn_params_init();
+	MyApplication.init(&usb_device);
+	char descriptor_buffer[255] = { 0 };
+	u8 index = usb_device->device_descriptor.iManufacturer;
+	UsbDescriptorParser.get_descriptor_string(index, descriptor_buffer, 255);
+		
+	gap_params_init(descriptor_buffer);  //device name
+    advertising_init();
+    services_init(); //manufacturer name (through dis init), hid init (through hid_init)
+    sensor_simulator_init();
+    conn_params_init();
 
     // Start execution.
     NRF_LOG_INFO("HID Mouse Start!\r\n");
-//    timers_start();
-//    advertising_start();
+    timers_start();
+    advertising_start();
 
-	MyApplication.init();
 
     // Enter main loop.
     for (;;)

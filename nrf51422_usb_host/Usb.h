@@ -35,7 +35,7 @@ APP_TIMER_DEF(m_usb_host_timer_id);
 
 
 struct usb {
-	void(*init)(void);			
+	USBDevice*(*init)(void);			
 };
 
 extern const struct usb Usb;

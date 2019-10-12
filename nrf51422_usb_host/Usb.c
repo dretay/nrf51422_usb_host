@@ -34,8 +34,10 @@ void usb_host_poll_timeout_handler(void * p_context) {
 	UNUSED_PARAMETER(p_context);
 	USBCore.poll();	
 }
-static void init()
+static USBDevice* init(void)
 {
+	USBDevice *usb_device;
+
 	nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
 	spi_config.ss_pin   = SPI_SS_PIN;
 	spi_config.miso_pin = SPI_MISO_PIN;
@@ -54,7 +56,7 @@ static void init()
 	config.spi_transmit_receive = spi_transmit_receive;
 	config.hard_reset = hard_reset;
 
-	USBDevice *usb_device = HIDUniversal.new(&config);
+	usb_device = HIDUniversal.new(&config);
 	usb_device->set_handler(&handler);
 	USBCore.init(usb_device, &config);
 	
@@ -63,6 +65,8 @@ static void init()
 
 	//start usb_host timer
 	APP_ERROR_CHECK(app_timer_start(m_usb_host_timer_id, USB_HOST_POLL_INTERVAL, NULL));	
+
+	return usb_device;
 }
 const struct usb Usb= { 
 	.init = init,		
