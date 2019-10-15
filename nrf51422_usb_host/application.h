@@ -10,9 +10,12 @@
 #include "PlatformConfig.h"
 #include "UsbDescriptorParser.h"
 
+//nrf51 libraries
+#include "nordic_common.h"
+#include "ble_hids.h"
 
-struct myapplication {
+struct application {
 	void(*init)(USBDevice **usb_device);			
 };
 
-extern const struct myapplication MyApplication;
+extern const struct application Application;

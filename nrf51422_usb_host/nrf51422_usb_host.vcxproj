@@ -42,8 +42,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|VisualGDB'">
     <ClCompile>
       <CLanguageStandard>GNU99</CLanguageStandard>
-      <AdditionalIncludeDirectories>../../include/usbhost;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>DEBUG=1;SPI_COUNT=2;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../include/usbhost;../../../../../../Program Files (x86)/SEGGER/JLink/Samples/RTT/SEGGER_RTT_V646/RTT;%(ClCompile.AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG=1;SPI_COUNT=2;DEBUG_LEVEL=2;%(ClCompile.PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLinkerInputs>;%(Link.AdditionalLinkerInputs)</AdditionalLinkerInputs>
@@ -63,6 +63,8 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\Program Files (x86)\SEGGER\JLink\Samples\RTT\SEGGER_RTT_V646\RTT\SEGGER_RTT.c" />
+    <ClCompile Include="..\..\..\..\..\..\Program Files (x86)\SEGGER\JLink\Samples\RTT\SEGGER_RTT_V646\RTT\SEGGER_RTT_printf.c" />
     <ClCompile Include="..\..\include\usbhost\HIDUniversal.c" />
     <ClCompile Include="..\..\include\usbhost\MAX3421E.c" />
     <ClCompile Include="..\..\include\usbhost\USBCore.c" />
@@ -73,6 +75,8 @@
     <ClCompile Include="SoftBlink.c" />
     <ClCompile Include="UartLogger.c" />
     <ClCompile Include="Usb.c" />
+    <ClInclude Include="..\..\..\..\..\..\Program Files (x86)\SEGGER\JLink\Samples\RTT\SEGGER_RTT_V646\RTT\SEGGER_RTT.h" />
+    <ClInclude Include="..\..\..\..\..\..\Program Files (x86)\SEGGER\JLink\Samples\RTT\SEGGER_RTT_V646\RTT\SEGGER_RTT_Conf.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="SoftBlink.h" />
     <ClInclude Include="UartLogger.h" />
@@ -350,5 +354,14 @@
     <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm.c" />
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm.h" />
     <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\low_power_pwm\low_power_pwm_dox_config.h" />
+    <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\log\src\nrf_log_backend_serial.c" />
+    <ClCompile Include="$(BSP_ROOT)\nRF5x\components\libraries\log\src\nrf_log_frontend.c" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\nrf_log.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\nrf_log_backend.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\nrf_log_backend_dox_config.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\nrf_log_ctrl.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\nrf_log_dox_config.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\src\nrf_log_ctrl_internal.h" />
+    <ClInclude Include="$(BSP_ROOT)\nRF5x\components\libraries\log\src\nrf_log_internal.h" />
   </ItemGroup>
 </Project>

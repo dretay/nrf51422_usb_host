@@ -1,5 +1,4 @@
 #include "UartLogger.h"
-
 static void uart_putstring(const uint8_t * str)
 {
 	uint32_t err_code;
@@ -37,38 +36,50 @@ static const char* level_colors[] = {
 	"\x1b[31m",
 	"\x1b[35m"
 };
+static u8 last_log_level = 0;
 static void log_log(bool append, bool terminate, int level, const char* file, const char* function, int line, const char* fmt, ...)
 {
-	
+	if (append)
+	{
+		level = last_log_level;
+	}
+	else
+	{
+		last_log_level = level;
+	}
+#ifdef DEBUG_LEVEL
 	va_list args;
 	char buf[100] = { 0 };
+	if (level >= DEBUG_LEVEL)
+	{
+		if (!append) {
 
-	if (!append) {
+			snprintf(buf,
+				100,
+				"%s%s %s%-5s\x1b[0m \x1b[90m%s:%s:%d:\x1b[0m ",
+				buf,
+				"\r\n",
+				level_colors[level],
+				level_names[level],
+				file,
+				function,
+				line);
+			uart_putstring(buf);
+		}
 
-		snprintf(buf,
-			100,
-			"%s%s %s%-5s\x1b[0m \x1b[90m%s:%s:%d:\x1b[0m ",
-			buf,
-			"\r\n",
-			level_colors[level],
-			level_names[level],
-			file,
-			function,
-			line);
-		uart_putstring(buf);
+		va_start(args, fmt);
+		myvprint(fmt, args);	
+		va_end(args);
+		if (terminate) {		
+
+			snprintf(buf,
+				2,
+				"\r\n",
+				buf);
+			uart_putstring(buf);
+		}
 	}
-
-	va_start(args, fmt);
-	myvprint(fmt, args);	
-	va_end(args);
-	if (terminate) {		
-
-		snprintf(buf,
-			2,
-			"\r\n",
-			buf);
-		uart_putstring(buf);
-	}
+#endif
 }
 
 volatile bool scheduled = false;

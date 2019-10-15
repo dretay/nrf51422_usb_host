@@ -13,9 +13,7 @@ static u32 millis(void)
 {
 	return (app_timer_cnt_get() / 32.768);
 }
-static void handler(uint8_t *prev_buf, uint8_t *buf)
-{
-}
+
 static void spi_transmit(u8* out, size_t out_size)
 {
 	APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, out, out_size, NULL, 0));	
@@ -34,7 +32,7 @@ void usb_host_poll_timeout_handler(void * p_context) {
 	UNUSED_PARAMETER(p_context);
 	USBCore.poll();	
 }
-static USBDevice* init(void)
+static USBDevice* init(USB_CALLBACK_FNP usb_callback)
 {
 	USBDevice *usb_device;
 
@@ -57,7 +55,7 @@ static USBDevice* init(void)
 	config.hard_reset = hard_reset;
 
 	usb_device = HIDUniversal.new(&config);
-	usb_device->set_handler(&handler);
+	usb_device->set_handler(usb_callback);
 	USBCore.init(usb_device, &config);
 	
 	// create usb_host timer.

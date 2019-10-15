@@ -54,6 +54,7 @@
 #include "fstorage.h"
 #include "ble_conn_state.h"
 #include "application.h"
+#include "HIDUniversal.h"
 
 #define NRF_LOG_MODULE_NAME "APP"
 #include "nrf_log.h"
@@ -144,9 +145,9 @@
 #define APP_ADV_FAST_TIMEOUT            30                                                        /**< The duration of the fast advertising period (in seconds). */
 #define APP_ADV_SLOW_TIMEOUT            180                                                       /**< The duration of the slow advertising period (in seconds). */
 
-static ble_hids_t m_hids;                                                                         /**< Structure used to identify the HID service. */
+ble_hids_t m_hids;                                                                         /**< Structure used to identify the HID service. */
 static ble_bas_t  m_bas;                                                                          /**< Structure used to identify the battery service. */
-static bool       m_in_boot_mode = false;                                                         /**< Current protocol mode. */
+bool       m_in_boot_mode = false;                                                         /**< Current protocol mode. */
 static uint16_t   m_conn_handle  = BLE_CONN_HANDLE_INVALID;                                       /**< Handle of the current connection. */
 
 static sensorsim_cfg_t   m_battery_sim_cfg;                                                       /**< Battery Level sensor simulator configuration. */
@@ -164,6 +165,7 @@ static bool           m_is_wl_changed;                                      /**<
 
 static void on_hids_evt(ble_hids_t * p_hids, ble_hids_evt_t * p_evt);
 
+static USBDevice* usb_device;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -464,11 +466,15 @@ static void timers_init(void)
  * @details This function sets up all the necessary GAP (Generic Access Profile) parameters of the
  *          device including the device name, appearance, and the preferred connection parameters.
  */
-static void gap_params_init(char* device_name)
+static void gap_params_init()
 {
     uint32_t                err_code;
     ble_gap_conn_params_t   gap_conn_params;
     ble_gap_conn_sec_mode_t sec_mode;
+	
+	char device_name[255] = { 0 };
+	u8 index = usb_device->device_descriptor.iProduct;
+	UsbDescriptorParser.get_descriptor_string(index, device_name, 255);
 
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
@@ -499,6 +505,9 @@ static void dis_init(void)
     uint32_t         err_code;
     ble_dis_init_t   dis_init_obj;
     ble_dis_pnp_id_t pnp_id;
+	char manufacturer_name[255] = { 0 };
+	u8 index = usb_device->device_descriptor.iManufacturer;
+	UsbDescriptorParser.get_descriptor_string(index, manufacturer_name, 255);
 
     pnp_id.vendor_id_source = PNP_ID_VENDOR_ID_SOURCE;
     pnp_id.vendor_id        = PNP_ID_VENDOR_ID;
@@ -507,7 +516,7 @@ static void dis_init(void)
 
     memset(&dis_init_obj, 0, sizeof(dis_init_obj));
 
-    ble_srv_ascii_to_utf8(&dis_init_obj.manufact_name_str, MANUFACTURER_NAME);
+	ble_srv_ascii_to_utf8(&dis_init_obj.manufact_name_str, manufacturer_name);
     dis_init_obj.p_pnp_id = &pnp_id;
 
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&dis_init_obj.dis_attr_md.read_perm);
@@ -552,110 +561,16 @@ static void hids_init(void)
     ble_hids_inp_rep_init_t   inp_rep_array[INPUT_REPORT_COUNT];
     ble_hids_inp_rep_init_t * p_input_report;
     uint8_t                   hid_info_flags;
+	u8 my_rep_map_data[144] = { 0 };
 
-    static uint8_t rep_map_data[] =
-    {
-        0x05, 0x01, // Usage Page (Generic Desktop)
-        0x09, 0x02, // Usage (Mouse)
-
-        0xA1, 0x01, // Collection (Application)
-
-        // Report ID 1: Mouse buttons + scroll/pan
-        0x85, 0x01,       // Report Id 1
-        0x09, 0x01,       // Usage (Pointer)
-        0xA1, 0x00,       // Collection (Physical)
-        0x95, 0x05,       // Report Count (3)
-        0x75, 0x01,       // Report Size (1)
-        0x05, 0x09,       // Usage Page (Buttons)
-        0x19, 0x01,       // Usage Minimum (01)
-        0x29, 0x05,       // Usage Maximum (05)
-        0x15, 0x00,       // Logical Minimum (0)
-        0x25, 0x01,       // Logical Maximum (1)
-        0x81, 0x02,       // Input (Data, Variable, Absolute)
-        0x95, 0x01,       // Report Count (1)
-        0x75, 0x03,       // Report Size (3)
-        0x81, 0x01,       // Input (Constant) for padding
-        0x75, 0x08,       // Report Size (8)
-        0x95, 0x01,       // Report Count (1)
-        0x05, 0x01,       // Usage Page (Generic Desktop)
-        0x09, 0x38,       // Usage (Wheel)
-        0x15, 0x81,       // Logical Minimum (-127)
-        0x25, 0x7F,       // Logical Maximum (127)
-        0x81, 0x06,       // Input (Data, Variable, Relative)
-        0x05, 0x0C,       // Usage Page (Consumer)
-        0x0A, 0x38, 0x02, // Usage (AC Pan)
-        0x95, 0x01,       // Report Count (1)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0xC0,             // End Collection (Physical)
-
-        // Report ID 2: Mouse motion
-        0x85, 0x02,       // Report Id 2
-        0x09, 0x01,       // Usage (Pointer)
-        0xA1, 0x00,       // Collection (Physical)
-        0x75, 0x0C,       // Report Size (12)
-        0x95, 0x02,       // Report Count (2)
-        0x05, 0x01,       // Usage Page (Generic Desktop)
-        0x09, 0x30,       // Usage (X)
-        0x09, 0x31,       // Usage (Y)
-        0x16, 0x01, 0xF8, // Logical maximum (2047)
-        0x26, 0xFF, 0x07, // Logical minimum (-2047)
-        0x81, 0x06,       // Input (Data, Variable, Relative)
-        0xC0,             // End Collection (Physical)
-        0xC0,             // End Collection (Application)
-
-        // Report ID 3: Advanced buttons
-        0x05, 0x0C,       // Usage Page (Consumer)
-        0x09, 0x01,       // Usage (Consumer Control)
-        0xA1, 0x01,       // Collection (Application)
-        0x85, 0x03,       // Report Id (3)
-        0x15, 0x00,       // Logical minimum (0)
-        0x25, 0x01,       // Logical maximum (1)
-        0x75, 0x01,       // Report Size (1)
-        0x95, 0x01,       // Report Count (1)
-
-        0x09, 0xCD,       // Usage (Play/Pause)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0x0A, 0x83, 0x01, // Usage (AL Consumer Control Configuration)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0x09, 0xB5,       // Usage (Scan Next Track)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0x09, 0xB6,       // Usage (Scan Previous Track)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-
-        0x09, 0xEA,       // Usage (Volume Down)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0x09, 0xE9,       // Usage (Volume Up)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0x0A, 0x25, 0x02, // Usage (AC Forward)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0x0A, 0x24, 0x02, // Usage (AC Back)
-        0x81, 0x06,       // Input (Data,Value,Relative,Bit Field)
-        0xC0              // End Collection
-    };
+	u32 data_len = HIDUniversal.get_report_descriptor(my_rep_map_data, 144);
+   
 
     memset(inp_rep_array, 0, sizeof(inp_rep_array));
     // Initialize HID Service.
-    p_input_report                      = &inp_rep_array[INPUT_REP_BUTTONS_INDEX];
-    p_input_report->max_len             = INPUT_REP_BUTTONS_LEN;
+    p_input_report                      = &inp_rep_array[INPUT_REP_BUTTONS_INDEX];	
+	p_input_report->max_len             = usb_device->device_descriptor.bMaxPacketSize0;
     p_input_report->rep_ref.report_id   = INPUT_REP_REF_BUTTONS_ID;
-    p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
-
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
-
-    p_input_report                      = &inp_rep_array[INPUT_REP_MOVEMENT_INDEX];
-    p_input_report->max_len             = INPUT_REP_MOVEMENT_LEN;
-    p_input_report->rep_ref.report_id   = INPUT_REP_REF_MOVEMENT_ID;
-    p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
-
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.write_perm);
-
-    p_input_report                      = &inp_rep_array[INPUT_REP_MPLAYER_INDEX];
-    p_input_report->max_len             = INPUT_REP_MEDIA_PLAYER_LEN;
-    p_input_report->rep_ref.report_id   = INPUT_REP_REF_MPLAYER_ID;
     p_input_report->rep_ref.report_type = BLE_HIDS_REP_TYPE_INPUT;
 
     BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&p_input_report->security_mode.cccd_write_perm);
@@ -670,14 +585,14 @@ static void hids_init(void)
     hids_init_obj.error_handler                  = service_error_handler;
     hids_init_obj.is_kb                          = false;
     hids_init_obj.is_mouse                       = true;
-    hids_init_obj.inp_rep_count                  = INPUT_REPORT_COUNT;
+    hids_init_obj.inp_rep_count                  = 1;
     hids_init_obj.p_inp_rep_array                = inp_rep_array;
     hids_init_obj.outp_rep_count                 = 0;
     hids_init_obj.p_outp_rep_array               = NULL;
     hids_init_obj.feature_rep_count              = 0;
     hids_init_obj.p_feature_rep_array            = NULL;
-    hids_init_obj.rep_map.data_len               = sizeof(rep_map_data);
-    hids_init_obj.rep_map.p_data                 = rep_map_data;
+	hids_init_obj.rep_map.data_len               = data_len;
+    hids_init_obj.rep_map.p_data                 = my_rep_map_data;
     hids_init_obj.hid_information.bcd_hid        = BASE_USB_HID_SPEC_VERSION;
     hids_init_obj.hid_information.b_country_code = 0;
     hids_init_obj.hid_information.flags          = hid_info_flags;
@@ -1356,7 +1271,7 @@ int main(void)
 {
     bool     erase_bonds;
     uint32_t err_code;
-	USBDevice* usb_device;
+	
 
     // Initialize.
     err_code = NRF_LOG_INIT(NULL);
@@ -1367,16 +1282,16 @@ int main(void)
     ble_stack_init();
     scheduler_init();
     peer_manager_init(erase_bonds);
+
     if (erase_bonds == true)
     {
         NRF_LOG_INFO("Bonds erased!\r\n");
     }
-	MyApplication.init(&usb_device);
-	char descriptor_buffer[255] = { 0 };
-	u8 index = usb_device->device_descriptor.iManufacturer;
-	UsbDescriptorParser.get_descriptor_string(index, descriptor_buffer, 255);
+	Application.init(&usb_device);
+
+	
+	gap_params_init();  //device name
 		
-	gap_params_init(descriptor_buffer);  //device name
     advertising_init();
     services_init(); //manufacturer name (through dis init), hid init (through hid_init)
     sensor_simulator_init();
