@@ -30,14 +30,22 @@ static void usb_callback(uint8_t *prev_buf, uint8_t *buf, u16 read)
 	}
 }
 
-static void init(USBDevice **usb_device)
+static void init(USBDevice **usb_device, bool *erase_bonds)
 {	
 	platform_config.log_log = UartLogger.log_log;
 
 	UartLogger.init();
 	*usb_device = Usb.init(usb_callback);
-	SoftBlink.init();
-	Button.init();	
+	Led.init();
+	Button.init(erase_bonds);	
+	if (*erase_bonds)
+	{
+		log_debug("ERASE BONDS!");
+	}
+	else
+	{
+		log_debug("DONT ERASE BONDS");
+	}
 
 	
 }

@@ -3,7 +3,7 @@
 //nrf libraries
 #include "app_button.h"
 #include "app_timer.h"
-
+#include "nrf_drv_gpiote.h"
 
 //project libraries
 #include "log.h"
@@ -37,6 +37,6 @@ APP_TIMER_DEF(button_timer_id);
 typedef uint8_t bsp_button_action_t;
 
 struct button {
-	void(*init)(void);			
+	void(*init)(bool *erase_bonds);			
 };
 extern const struct button Button;

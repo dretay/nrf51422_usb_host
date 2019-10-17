@@ -55,6 +55,7 @@
 #include "ble_conn_state.h"
 #include "application.h"
 #include "HIDUniversal.h"
+#include "Led.h"
 
 #define NRF_LOG_MODULE_NAME "APP"
 #include "nrf_log.h"
@@ -756,6 +757,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
             break;
 
         case BLE_ADV_EVT_FAST:
+	    Led.advertising_fast();
             NRF_LOG_INFO("BLE_ADV_EVT_FAST\r\n");
             err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
             APP_ERROR_CHECK(err_code);
@@ -847,6 +849,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_CONNECTED:
+	    Led.ble_connected();
             NRF_LOG_INFO("Connected\r\n");
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
             APP_ERROR_CHECK(err_code);
@@ -1115,55 +1118,7 @@ static void scheduler_init(void)
 }
 
 
-/**@brief Function for sending a Mouse Movement.
- *
- * @param[in]   x_delta   Horizontal movement.
- * @param[in]   y_delta   Vertical movement.
- */
-static void mouse_movement_send(int16_t x_delta, int16_t y_delta)
-{
-    uint32_t err_code;
 
-    if (m_in_boot_mode)
-    {
-        x_delta = MIN(x_delta, 0x00ff);
-        y_delta = MIN(y_delta, 0x00ff);
-
-        err_code = ble_hids_boot_mouse_inp_rep_send(&m_hids,
-                                                    0x00,
-                                                    (int8_t)x_delta,
-                                                    (int8_t)y_delta,
-                                                    0,
-                                                    NULL);
-    }
-    else
-    {
-        uint8_t buffer[INPUT_REP_MOVEMENT_LEN];
-
-        APP_ERROR_CHECK_BOOL(INPUT_REP_MOVEMENT_LEN == 3);
-
-        x_delta = MIN(x_delta, 0x0fff);
-        y_delta = MIN(y_delta, 0x0fff);
-
-        buffer[0] = x_delta & 0x00ff;
-        buffer[1] = ((y_delta & 0x000f) << 4) | ((x_delta & 0x0f00) >> 8);
-        buffer[2] = (y_delta & 0x0ff0) >> 4;
-
-        err_code = ble_hids_inp_rep_send(&m_hids,
-                                         INPUT_REP_MOVEMENT_INDEX,
-                                         INPUT_REP_MOVEMENT_LEN,
-                                         buffer);
-    }
-
-    if ((err_code != NRF_SUCCESS) &&
-        (err_code != NRF_ERROR_INVALID_STATE) &&
-        (err_code != BLE_ERROR_NO_TX_PACKETS) &&
-        (err_code != BLE_ERROR_GATTS_SYS_ATTR_MISSING)
-       )
-    {
-        APP_ERROR_HANDLER(err_code);
-    }
-}
 
 
 /**@brief Function for handling events from the BSP module.
@@ -1197,34 +1152,6 @@ static void bsp_event_handler(bsp_event_t event)
                 {
                     APP_ERROR_CHECK(err_code);
                 }
-            }
-            break;
-
-        case BSP_EVENT_KEY_0:
-            if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
-            {
-                mouse_movement_send(-MOVEMENT_SPEED, 0);
-            }
-            break;
-
-        case BSP_EVENT_KEY_1:
-            if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
-            {
-                mouse_movement_send(0, -MOVEMENT_SPEED);
-            }
-            break;
-
-        case BSP_EVENT_KEY_2:
-            if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
-            {
-                mouse_movement_send(MOVEMENT_SPEED, 0);
-            }
-            break;
-
-        case BSP_EVENT_KEY_3:
-            if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
-            {
-                mouse_movement_send(0, MOVEMENT_SPEED);
             }
             break;
 
@@ -1281,13 +1208,13 @@ int main(void)
 //    buttons_leds_init(&erase_bonds);
     ble_stack_init();
     scheduler_init();
+	Application.init(&usb_device, &erase_bonds);
     peer_manager_init(erase_bonds);
 
     if (erase_bonds == true)
     {
         NRF_LOG_INFO("Bonds erased!\r\n");
     }
-	Application.init(&usb_device);
 
 	
 	gap_params_init();  //device name

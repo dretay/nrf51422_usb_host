@@ -13,7 +13,7 @@ static void button_action_callback(button_event_t event)
 	switch (event)
 	{
 	case BUTTON_EVENT_KEY_0:
-		my_log_debug("BUTTON_EVENT_KEY_0!");
+		NVIC_SystemReset();
 		break;
 	default:
 		break;
@@ -124,14 +124,23 @@ uint32_t event_to_button_action_assign(uint32_t button, bsp_button_action_t acti
 	return err_code;
 }
 
-static void init(void)
+static void init(bool *erase_bonds)
 {	
 	m_registered_callback = button_action_callback;
 	for (int num = 0; (num < TOTAL_BUTTONS); num++)
 	{
 		APP_ERROR_CHECK(event_to_button_action_assign(num, BUTTON_ACTION_PUSH, BUTTON_EVENT_DEFAULT));
+		APP_ERROR_CHECK(event_to_button_action_assign(num, BSP_BUTTON_ACTION_LONG_PUSH, BUTTON_EVENT_KEY_0));
 	}
 	APP_ERROR_CHECK(app_button_init((app_button_cfg_t *)app_buttons, TOTAL_BUTTONS, APP_TIMER_TICKS(100, 0) / 2));
+	if (nrf_drv_gpiote_in_is_set(BUTTON_1_PIN))
+	{
+		*erase_bonds = false;
+	}
+	else
+	{
+		*erase_bonds = true;
+	}
 	APP_ERROR_CHECK(app_button_enable());
 	APP_ERROR_CHECK(app_timer_create(&button_timer_id, APP_TIMER_MODE_SINGLE_SHOT, button_timer_handler));
 
