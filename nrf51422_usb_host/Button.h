@@ -11,7 +11,6 @@
 
 #define BUTTON_LONG_PUSH (2)
 
-#define my_log_debug(...) UartLogger.log_log(false, false, LOG_DEBUG, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
 #define LONG_PUSH_TIMEOUT_MS 1000
 

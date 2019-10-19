@@ -8,7 +8,6 @@
 #include "log.h"
 #include "UartLogger.h"
 
-#define my_log_debug(...) UartLogger.log_log(false, false, LOG_DEBUG, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 
 struct led {

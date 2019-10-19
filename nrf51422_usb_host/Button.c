@@ -20,11 +20,11 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 		switch (button_action)
 		{
 		case APP_BUTTON_PUSH:
-			my_log_debug("APP_BUTTON_PUSH!");
+			app_log_debug("APP_BUTTON_PUSH!");
 			
 			if (button_configs[button].long_push != NULL)
 			{
-				my_log_debug("registering longpoll listener!");
+				app_log_debug("registering longpoll listener!");
 				err_code = app_timer_start(button_timer_id, MS_TO_TICK(LONG_PUSH_TIMEOUT_MS), (void*)&current_long_push_pin_no);
 				button_configs[button].push();
 				if (err_code == NRF_SUCCESS)
@@ -33,12 +33,12 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 				}
 				else
 				{
-					my_log_debug("cant create timer!");
+					app_log_debug("cant create timer!");
 				}
 			}
 			break;
 		case APP_BUTTON_RELEASE:
-			my_log_debug("APP_BUTTON_RELEASE!");
+			app_log_debug("APP_BUTTON_RELEASE!");
 
 			(void)app_timer_stop(button_timer_id);
 			if (button_configs[button].release != NULL)
@@ -47,7 +47,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 			}
 			break;
 		case BUTTON_LONG_PUSH:
-			my_log_debug("BUTTON_LONG_PUSH!");
+			app_log_debug("BUTTON_LONG_PUSH!");
 			if (button_configs[button].long_push != NULL)
 			{
 				button_configs[button].long_push();
@@ -57,7 +57,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 }
 static void button_timer_handler(void * p_context)
 {
-	my_log_debug("button_timer_handler!");
+	app_log_debug("button_timer_handler!");
 	button_event_handler(*(uint8_t *)p_context, BUTTON_LONG_PUSH);
 }
 

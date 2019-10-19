@@ -4,11 +4,6 @@
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE); /**< SPI instance. */
 static volatile bool spi_xfer_done; /**< Flag used to indicate that SPI instance completed the transfer. */
 
-#define TEST_STRING "Nordic"
-static uint8_t       m_tx_buf[] = TEST_STRING; /**< TX buffer. */
-static uint8_t       m_rx_buf[sizeof(TEST_STRING) + 1]; /**< RX buffer. */
-static const uint8_t m_length = sizeof(m_tx_buf); /**< Transfer length. */
-
 static u32 millis(void)
 {
 	return (app_timer_cnt_get() / 32.768);
