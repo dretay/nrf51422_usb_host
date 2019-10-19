@@ -33,7 +33,7 @@
 #define USB_HOST_POLL_INTERVAL APP_TIMER_TICKS(20, 0)
 APP_TIMER_DEF(m_usb_host_timer_id);
 
-typedef void(*USB_CALLBACK_FNP)(u8*, u8*);
+typedef void(*USB_CALLBACK_FNP)(u8*, u8*,u16);
 
 struct usb {
 	USBDevice*(*init)(USB_CALLBACK_FNP);			

@@ -41,9 +41,7 @@
 #include "ble_bas.h"
 #include "ble_dis.h"
 #include "ble_conn_params.h"
-#include "bsp.h"
 #include "sensorsim.h"
-#include "bsp_btn_ble.h"
 #include "app_scheduler.h"
 #include "softdevice_handler_appsh.h"
 #include "app_timer_appsh.h"
@@ -61,9 +59,6 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 
-#if BUTTONS_NUMBER < 4
-#error "Not enough resources on board to run example"
-#endif
 
 #if (NRF_SD_BLE_API_VERSION == 3)
 #define NRF_BLE_MAX_MTU_SIZE            GATT_MTU_SIZE_DEFAULT                      /**< MTU size used in the softdevice enabling and to reply to a BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST event. */
@@ -73,9 +68,6 @@
 
 #define CENTRAL_LINK_COUNT              0                                          /**< Number of central links used by the application. When changing this number remember to adjust the RAM settings*/
 #define PERIPHERAL_LINK_COUNT           1                                          /**< Number of peripheral links used by the application. When changing this number remember to adjust the RAM settings*/
-
-#define UART_TX_BUF_SIZE                256                                        /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE                1                                          /**< UART RX buffer size. */
 
 #define LEFT_BUTTON_ID                  0                                          /**< Button used for moving the mouse pointer to the left. */
 #define UP_BUTTON_ID                    1                                          /**< Button used for moving the mouse pointer upwards. */
@@ -695,13 +687,7 @@ static void timers_start(void)
  */
 static void sleep_mode_enter(void)
 {
-    uint32_t err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-
-    APP_ERROR_CHECK(err_code);
-
-    // Prepare wakeup buttons.
-    err_code = bsp_btn_ble_sleep_mode_prepare();
-    APP_ERROR_CHECK(err_code);
+	uint32_t err_code;
 
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
     err_code = sd_power_system_off();
@@ -752,40 +738,26 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     {
         case BLE_ADV_EVT_DIRECTED:
             NRF_LOG_INFO("BLE_ADV_EVT_DIRECTED\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_DIRECTED);
-            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_FAST:
 	    Led.advertising_fast();
             NRF_LOG_INFO("BLE_ADV_EVT_FAST\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_SLOW:
             NRF_LOG_INFO("BLE_ADV_EVT_SLOW\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_SLOW);
-            APP_ERROR_CHECK(err_code);
-            break;
+			break;
 
         case BLE_ADV_EVT_FAST_WHITELIST:
             NRF_LOG_INFO("BLE_ADV_EVT_FAST_WHITELIST\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
-            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_SLOW_WHITELIST:
             NRF_LOG_INFO("BLE_ADV_EVT_SLOW_WHITELIST\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING_WHITELIST);
-            APP_ERROR_CHECK(err_code);
-            err_code = ble_advertising_restart_without_whitelist();
-            APP_ERROR_CHECK(err_code);
             break;
 
         case BLE_ADV_EVT_IDLE:
-            err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-            APP_ERROR_CHECK(err_code);
             sleep_mode_enter();
             break;
 
@@ -851,17 +823,13 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
         case BLE_GAP_EVT_CONNECTED:
 	    Led.ble_connected();
             NRF_LOG_INFO("Connected\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            APP_ERROR_CHECK(err_code);
-
+           
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             break; // BLE_GAP_EVT_CONNECTED
 
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("Disconnected\r\n");
-            err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-            APP_ERROR_CHECK(err_code);
-
+           
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
 
             if (m_is_wl_changed)
@@ -958,7 +926,6 @@ static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
      * Remember to call ble_conn_state_on_ble_evt before calling any ble_conns_state_* functions. */
     ble_conn_state_on_ble_evt(p_ble_evt);
     pm_on_ble_evt(p_ble_evt);
-    bsp_btn_ble_on_ble_evt(p_ble_evt);
     on_ble_evt(p_ble_evt);
     ble_advertising_on_ble_evt(p_ble_evt);
     ble_conn_params_on_ble_evt(p_ble_evt);
@@ -995,7 +962,13 @@ static void ble_stack_init(void)
 {
     uint32_t err_code;
 
-    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+	nrf_clock_lf_cfg_t clock_lf_cfg = 
+	{ 
+		.source = NRF_CLOCK_LF_SRC_XTAL, 
+	    .rc_ctiv = 0, 
+	    .rc_temp_ctiv = 0, 
+	    .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM
+	 };
 
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_APPSH_INIT(&clock_lf_cfg, true);
@@ -1115,70 +1088,6 @@ static void advertising_init(void)
 static void scheduler_init(void)
 {
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-}
-
-
-
-
-
-/**@brief Function for handling events from the BSP module.
- *
- * @param[in]   event   Event generated by button press.
- */
-static void bsp_event_handler(bsp_event_t event)
-{
-    uint32_t err_code;
-
-    switch (event)
-    {
-        case BSP_EVENT_SLEEP:
-            sleep_mode_enter();
-            break;
-
-        case BSP_EVENT_DISCONNECT:
-            err_code = sd_ble_gap_disconnect(m_conn_handle,
-                                             BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-            if (err_code != NRF_ERROR_INVALID_STATE)
-            {
-                APP_ERROR_CHECK(err_code);
-            }
-            break;
-
-        case BSP_EVENT_WHITELIST_OFF:
-            if (m_conn_handle == BLE_CONN_HANDLE_INVALID)
-            {
-                err_code = ble_advertising_restart_without_whitelist();
-                if (err_code != NRF_ERROR_INVALID_STATE)
-                {
-                    APP_ERROR_CHECK(err_code);
-                }
-            }
-            break;
-
-        default:
-            break;
-    }
-}
-
-
-/**@brief Function for initializing buttons and leds.
- *
- * @param[out] p_erase_bonds  Will be true if the clear bonding button was pressed to wake the application up.
- */
-static void buttons_leds_init(bool * p_erase_bonds)
-{
-    bsp_event_t startup_event;
-
-    uint32_t err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS,
-                                 APP_TIMER_TICKS(100, APP_TIMER_PRESCALER),
-                                 bsp_event_handler);
-
-    APP_ERROR_CHECK(err_code);
-
-    err_code = bsp_btn_ble_init(NULL, &startup_event);
-    APP_ERROR_CHECK(err_code);
-
-    *p_erase_bonds = (startup_event == BSP_EVENT_CLEAR_BONDING_DATA);
 }
 
 

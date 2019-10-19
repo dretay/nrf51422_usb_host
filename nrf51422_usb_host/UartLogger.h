@@ -10,6 +10,7 @@
 #include "app_error.h"
 #include <app_uart.h>
 #include <nrf_uart.h>
+#include <app_scheduler.h>
 
 //project libraries
 #include "types_shortcuts.h"
