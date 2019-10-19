@@ -2,19 +2,9 @@
 
 static PlatformConfig platform_config;
 
-struct MOUSEINFO {
 
-	struct {
-		uint8_t bmLeftButton : 1;
-		uint8_t bmRightButton : 1;
-		uint8_t bmMiddleButton : 1;
-		uint8_t bmDummy : 5;
-	};
-	int8_t dX;
-	int8_t dY;
-};
 extern ble_hids_t m_hids; 
-extern bool m_in_boot_mode;
+static bool erase_bonds = false;
 
 static void usb_callback(uint8_t *prev_buf, uint8_t *buf, u16 read)
 {
@@ -29,23 +19,34 @@ static void usb_callback(uint8_t *prev_buf, uint8_t *buf, u16 read)
 		APP_ERROR_HANDLER(err_code);
 	}
 }
-
-static void init(USBDevice **usb_device, bool *erase_bonds)
+static void push_callback(void)
+{
+	log_debug("push_callback");
+}
+static void release_callback(void)
+{
+	log_debug("release_callback");	
+}
+static void long_push_callback(void)
+{
+	log_debug("long_push_callback");	
+	NVIC_SystemReset();
+}
+static void startup_callback(void)
+{
+	log_debug("startup_callback");
+	erase_bonds = true;
+}
+static void init(USBDevice **usb_device, bool *erase_bonds_in)
 {	
 	platform_config.log_log = UartLogger.log_log;
 
 	UartLogger.init();
 	*usb_device = Usb.init(usb_callback);
 	Led.init();
-	Button.init(erase_bonds);	
-	if (*erase_bonds)
-	{
-		log_debug("ERASE BONDS!");
-	}
-	else
-	{
-		log_debug("DONT ERASE BONDS");
-	}
+	Button.add_button(20, push_callback, long_push_callback, release_callback, startup_callback);
+	Button.start();
+	*erase_bonds_in = erase_bonds;
 
 	
 }

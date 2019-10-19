@@ -9,34 +9,26 @@
 #include "log.h"
 #include "UartLogger.h"
 
-#define BSP_BUTTON_ACTION_LONG_PUSH (2)
-typedef enum
-{
-	BUTTON_EVENT_NOTHING = 0,
-	BUTTON_EVENT_DEFAULT,
-	BUTTON_EVENT_KEY_0,
-	
-} button_event_t;
-#define TOTAL_BUTTONS 1
-#define BUTTON_1_PIN       20
-#define BUTTON_PIN_LIST { BUTTON_1_PIN }
+#define BUTTON_LONG_PUSH (2)
 
-#define BSP_LONG_PUSH_TIMEOUT_MS (1000) /**< The time to hold for a long push (in milliseconds). */
+#define my_log_debug(...) UartLogger.log_log(false, false, LOG_DEBUG, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
+#define LONG_PUSH_TIMEOUT_MS 1000
+
+APP_TIMER_DEF(button_timer_id);
+
+#define BUTTON_LIST_MAX 1
 typedef struct
 {
-	button_event_t push_event; /**< The event to fire on regular button press. */
-	button_event_t long_push_event; /**< The event to fire on long button press. */
-	button_event_t release_event; /**< The event to fire on button release. */
-} button_event_cfg_t;
-#define my_log_debug(...) UartLogger.log_log(false, false, LOG_DEBUG, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define BSP_MS_TO_TICK(MS) (m_app_ticks_per_100ms * (MS / 100))
-typedef void(* event_callback_t)(button_event_t);
-APP_TIMER_DEF(button_timer_id);
-#define BUTTON_ACTION_PUSH      (APP_BUTTON_PUSH)
-#define BUTTON_ACTION_RELEASE   (APP_BUTTON_RELEASE)
-typedef uint8_t bsp_button_action_t;
+	u8 pin;
+	void(*push)(void);
+	void(*long_push)(void);
+	void(*release)(void);
+	void(*startup)(void);
+} button_config;
 
 struct button {
-	void(*init)(bool *erase_bonds);			
+	bool(*add_button)(u8 pin, void* push_callback, void* long_push_callback, void* release_callback, void* startup_callback);
+	void(*start)(void);			
 };
 extern const struct button Button;
