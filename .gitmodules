@@ -1,0 +1,3 @@
+[submodule "usb_host"]
+	path = usb_host
+	url = https://github.com/dretay/usb_host
