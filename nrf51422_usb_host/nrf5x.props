@@ -16,13 +16,13 @@
 	</ItemDefinitionGroup>
 	<ItemDefinitionGroup>
 		<Link>
-			<LinkerScript Condition="'%(Link.LinkerScript)' == ''">$(BSP_ROOT)/nRF5x/LinkerScripts/nRF51422_XXAC_S130.lds</LinkerScript>
+			<LinkerScript Condition="'%(Link.LinkerScript)' == ''">$(BSP_ROOT)/nRF5x/LinkerScripts/nRF51422_XXAA_S130.lds</LinkerScript>
 			<LibrarySearchDirectories>$(BSP_ROOT)/nRF5x/SoftdeviceLibraries;%(Link.LibrarySearchDirectories)</LibrarySearchDirectories>
 			<AdditionalOptions>--specs=nano.specs --specs=nosys.specs -mabi=aapcs %(Link.AdditionalOptions)</AdditionalOptions>
 		</Link>
 	</ItemDefinitionGroup>
 	<PropertyGroup>
-		<DefaultLinkerScript>$(BSP_ROOT)/nRF5x/LinkerScripts/nRF51422_XXAC_S130.lds</DefaultLinkerScript>
+		<DefaultLinkerScript>$(BSP_ROOT)/nRF5x/LinkerScripts/nRF51422_XXAA_S130.lds</DefaultLinkerScript>
 	</PropertyGroup>
 
 	<ItemDefinitionGroup>

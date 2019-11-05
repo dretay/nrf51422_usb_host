@@ -964,14 +964,13 @@ static void ble_stack_init(void)
 
 	nrf_clock_lf_cfg_t clock_lf_cfg = 
 	{ 
-		.source = NRF_CLOCK_LF_SRC_XTAL, 
-	    .rc_ctiv = 0, 
-	    .rc_temp_ctiv = 0, 
-	    .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM
+		.source = NRF_CLOCK_LF_SRC_RC, 
+	    .rc_ctiv = 16,  // Check temperature every 4 seconds
+	    .rc_temp_ctiv = 0, // Calibrate at least every 8 seconds even if the temperature hasn't changed
 	 };
 
     // Initialize the SoftDevice handler module.
-    SOFTDEVICE_HANDLER_APPSH_INIT(&clock_lf_cfg, true);
+    SOFTDEVICE_HANDLER_APPSH_INIT(NRF_CLOCK_LF_XTAL_ACCURACY_250_PPM, true);
 
     ble_enable_params_t ble_enable_params;
     err_code = softdevice_enable_get_default_config(CENTRAL_LINK_COUNT,

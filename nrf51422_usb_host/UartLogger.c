@@ -127,11 +127,10 @@ static void init()
 
 	app_uart_comm_params_t const comm_params =
 	{
-		.rx_pin_no = UART_RX_PIN,
 		.tx_pin_no = UART_TX_PIN,		
 		.flow_control = APP_UART_FLOW_CONTROL_DISABLED,
 		.use_parity = false,
-		.baud_rate = NRF_UART_BAUDRATE_1000000  
+		.baud_rate = NRF_UART_BAUDRATE_921600  
 	};
 
 	APP_UART_FIFO_INIT(&comm_params,

@@ -14,6 +14,7 @@
 #include "nordic_common.h"
 #include "ble_hids.h"
 
+
 struct application {
 	void(*init)(USBDevice **usb_device, bool *erase_bonds);			
 };

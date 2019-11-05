@@ -15,11 +15,11 @@
 #include "UartLogger.h"
 #include "log.h"
 
-#define SPI_SS_PIN 15
-#define SPI_MOSI_PIN 16
-#define SPI_MISO_PIN 17
-#define SPI_SCK_PIN 18
-#define SPI_RST_PIN 19
+#define SPI_SS_PIN 1
+#define SPI_MOSI_PIN 2
+#define SPI_MISO_PIN 3
+#define SPI_SCK_PIN 4
+#define SPI_RST_PIN 9
 
 #define MAX_CS_PIN		GPIO_PIN_4
 #define MAX_CS_PORT		GPIOA

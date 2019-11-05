@@ -3,6 +3,9 @@
 //nrf libraries
 #include "led_softblink.h"
 #include "app_error.h"
+#include "app_timer.h"
+#include "nrf_gpio.h"
+
 
 //project libraries
 #include "log.h"

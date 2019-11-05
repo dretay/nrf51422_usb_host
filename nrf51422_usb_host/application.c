@@ -36,13 +36,17 @@ static void startup_callback(void)
 }
 static void init(USBDevice **usb_device, bool *erase_bonds_in)
 {	
+#ifdef DEBUG_LEVEL
 	UartLogger.init();
+#endif
+
 	*usb_device = Usb.init(usb_callback);
 	Led.init();
-	Button.add_button(20, push_callback, long_push_callback, release_callback, startup_callback);
+	Button.add_button(10, push_callback, long_push_callback, release_callback, startup_callback);
 	Button.start();
 	*erase_bonds_in = erase_bonds;
 
+	app_log_info("application started successfully!");
 	
 }
 

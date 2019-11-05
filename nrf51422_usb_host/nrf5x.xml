@@ -8,7 +8,7 @@
   </ToolchainVersion>
   <BspID>com.sysprogs.arm.nordic.nrf5x-legacy</BspID>
   <BspVersion>12.0</BspVersion>
-  <McuID>nRF51422_XXAC</McuID>
+  <McuID>nRF51422_XXAA</McuID>
   <MCUDefinitionFile>nRF5x/DeviceDefinitions/nRF51.xml</MCUDefinitionFile>
   <MCUProperties>
     <Entries>
